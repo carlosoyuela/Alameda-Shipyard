@@ -258,3 +258,57 @@ RMSE_Lin = np.square(y_pred - Y_val)
 RMSE_Lin = np.sqrt(RMSE_Lin.mean())
 RMSE_base = np.square(y_predpr - Y_val)
 RMSE_base = np.sqrt(RMSE_base.mean())
+
+# R Code
+# Simple Linear Regeression for Blast Equip
+
+blastequiptrain <- read.csv("blastequiptrain.csv") 
+blastequiptest = read.csv("blastequiptest.csv")
+set.seed(144)
+mod2 <- lm(Time.for.Work ~  SQFT, 
+           data = blastequiptrain)
+summary(mod2)
+
+blastequippred <- predict(mod2, newdata=blastequiptest)
+# this builds a vector of predicted values on the test set
+SSE = sum((blastequiptest$Time.for.Work - blastequippred)^2)
+SST = sum((blastequiptest$Time.for.Work - mean(blastequiptrain$Time.for.Work))^2)
+OSR2 = 1 - SSE/SST
+
+RMSE_Lin = sqrt(mean((blastequippred - blastequiptest$Time.for.Work)^2))
+#Complex Linear Regression for Blast Equip
+#Locations laid out
+blastequipstrain <- read.csv("blastequipstrain.csv") 
+blastequipstest = read.csv("blastequipstest.csv")
+set.seed(144)
+mod3 <- lm(Time.for.Work ~  SQFT + num.of.Painters + Super.structure + UWH + Freeboard + Synchro + Decks + Number.of.Hoses + HMB1 + Pier.3 + MOB, 
+          data = blastequipstrain)
+summary(mod3)
+
+blastequippreds <- predict(mod3, newdata=blastequipstest)
+# this builds a vector of predicted values on the test set
+SSE = sum((blastequipstest$Time.for.Work - blastequippreds)^2)
+SST = sum((blastequipstest$Time.for.Work - mean(blastequipstrain$Time.for.Work))^2)
+OSR2 = 1 - SSE/SST
+
+RMSE_Lin = sqrt(mean((blastequippreds - blastequiptest$Time.for.Work)^2))
+vif(mod3)
+
+#Complex Linear Regression for Blast Equip
+#Areas
+blastareastrain <- read.csv("blastareastrain.csv") 
+blastareastest = read.csv("blastareastest.csv")
+set.seed(144)
+mod3 <- lm(Time.for.Work ~  SQFT + 1, 
+           data = blastareastrain)
+summary(mod3)
+
+blastareaspreds <- predict(mod3, newdata=blastareastest)
+# this builds a vector of predicted values on the test set
+SSE = sum((blastareastest$Time.for.Work - blastareaspreds)^2)
+SST = sum((blastareastest$Time.for.Work - mean(blastareastrain$Time.for.Work))^2)
+OSR2 = 1 - SSE/SST
+
+RMSE_Lin = sqrt(mean((blastareaspreds - blastequiptest$Time.for.Work)^2))
+
+vif(mod3)
