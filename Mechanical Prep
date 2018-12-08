@@ -1,0 +1,248 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn import datasets, linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+
+mechprep = pd.DataFrame(pd.read_excel('Mech Prep.xlsx'))
+#mechprep.columns
+mechprepsimple = mechprep.drop(['Lessons learned ','Area ','Date', 'TASK', 'Num of Painters', 'Num of Shifts', 'Length of Shift', 'Calculated Hours', 'Unadjusted Production Rate', 'Crew Chief Hours', 'Total Hours', 'Lead Rate', 'Adjusted Rate', 'Vessel ', 'Super Structure', 'UWH', 'Freeboard', 'Spots','Decks','Sand','SP3'],axis = 1)
+mechprepsimple = mechprepsimple.dropna()
+mechprepbasic = mechprep.drop(['Lessons learned ','Area ','Date', 'TASK', 'Num of Painters', 'Num of Shifts', 'Length of Shift', 'Unadjusted Production Rate', 'Crew Chief Hours', 'Total Hours', 'Lead Rate', 'Adjusted Rate', 'Vessel '],axis = 1)
+mechprepbasic = mechprepbasic.dropna()
+mechpreppr = mechprep.drop(['Lessons learned ','Area ','Date', 'TASK', 'Num of Shifts', 'Length of Shift', 'Crew Chief Hours', 'Total Hours', 'Lead Rate', 'Adjusted Rate', 'Vessel '],axis = 1)
+mechprepad = mechprep.drop(['Lessons learned ','Area ','Date', 'TASK', 'Num of Shifts', 'Length of Shift', 'Crew Chief Hours', 'Total Hours', 'Lead Rate', 'Unadjusted Production Rate', 'Vessel ','Calculated Hours'],axis = 1)
+mechpreparea = mechprep.drop(['Lessons learned ','Date', 'TASK', 'Num of Painters', 'Num of Shifts', 'Length of Shift', 'Crew Chief Hours', 'Total Hours', 'Lead Rate', 'Unadjusted Production Rate', 'Vessel ','Calculated Hours'],axis = 1)
+mechpreppr = mechpreppr.fillna(value = round(mechpreppr['Num of Painters'].mean()))
+mechprepad = mechprepad.fillna(value = round(mechprepad['Num of Painters'].mean()))
+
+D = mechprepsimple['SQFT']
+T = mechprepsimple['Time for Work']
+Y_train, Y_test, X_train, X_test = train_test_split(T,D, test_size=0.3)
+mechprep_train = pd.DataFrame([X_train,Y_train])
+mechprep_train = mechprep_train.T
+mechprep_test = pd.DataFrame([X_test,Y_test])
+mechprep_test = mechprep_test.T
+mechprep_train.to_csv("mechpreptrain.csv", encoding = 'utf-8',index=False)
+mechprep_test.to_csv("mechpreptest.csv", encoding = 'utf-8',index=False)
+
+D = mechpreppr.drop(['Time for Work','Calculated Hours', 'Unadjusted Production Rate'], axis = 1)
+T = mechpreppr['Time for Work']
+Y_train, Y_test, X_train, X_test = train_test_split(T,D, test_size=0.3)
+mechpreps_train = pd.DataFrame([X_train['SQFT'], X_train['Num of Painters'], X_train['Super Structure'], X_train['UWH'], X_train['Freeboard'], X_train['Spots'], X_train['Decks'], X_train['Sand'], X_train['SP3'], Y_train])
+mechpreps_train = mechpreps_train.T
+mechpreps_test = pd.DataFrame([X_test['SQFT'],X_test['Num of Painters'], X_test['Super Structure'], X_test['UWH'], X_test['Freeboard'], X_test['Spots'], X_test['Decks'], X_test['Sand'], X_test['SP3'], Y_test])
+mechpreps_test = mechpreps_test.T
+mechpreps_train.to_csv("mechprepstrain.csv", encoding = 'utf-8',index=False)
+mechpreps_test.to_csv("mechprepstest.csv", encoding = 'utf-8',index=False)
+
+D = mechpreppr.drop(['Time for Work','Calculated Hours', 'Unadjusted Production Rate'], axis = 1)
+T = mechpreppr['Time for Work']
+Y_train, Y_test, X_train, X_test = train_test_split(T,D, test_size=0.3)
+mechareas_train = pd.DataFrame([X_train['SQFT'], X_train['Num of Painters'], X_train['Areas'], X_train['Spots'], X_train['Sand'], X_train['SP3'], Y_train])
+mechareas_train = mechareas_train.T
+mechareas_test = pd.DataFrame([X_test['SQFT'],X_test['Num of Painters'], X_test['Areas'], X_test['Spots'], X_test['Sand'], X_test['SP3'], Y_test])
+mechareas_test = mechareas_test.T
+mechareas_train.to_csv("mechareastrain.csv", encoding = 'utf-8',index=False)
+mechareas_test.to_csv("mechareastest.csv", encoding = 'utf-8',index=False)
+
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn import datasets, linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+
+D = mechpreppr.drop(['Calculated Hours'],axis = 1)
+T = mechpreppr['Time for Work']
+
+#def linregperformance():
+Y_real_train, Y_real_test, X_real_train, X_real_test = train_test_split(T,D, test_size=0.2)
+
+X_train = X_real_train['SQFT']
+X_val = X_real_test['SQFT']
+Y_train = Y_real_train
+Y_val = Y_real_test
+
+regr = linear_model.LinearRegression()
+X_train = X_train.reshape(-1,1)
+regr.fit(X_train, Y_train)
+X_val = X_val.reshape(-1,1)
+y_pred = regr.predict(X_val)
+y_pred_train = regr.predict(X_train)
+
+y_predpr = X_real_test['SQFT']*(1/X_real_train['Unadjusted Production Rate'].mean())
+y_predpr_train = X_real_train['SQFT']*(1/X_real_train['Unadjusted Production Rate'].mean())
+    
+#regrs = linear_model.LinearRegression()
+#X_trains = X_train['SQFT'].reshape(-1,1)
+#regrs.fit(X_train, Y_train)
+#X_vals = X_val['SQFT'].reshape(-1,1)
+#y_pred = regrs.predict(X_val)
+#y_pred_train = regrs.predict(X_train)
+    
+    #random_forest = RandomForestClassifier(n_estimators=1000)
+    #random_forest.fit(X_train, Y_train)
+    #acc_random_forest = random_forest.score(X_val, Y_val)
+    #acc_random_forest
+
+print("Base Test Mean squared error: %.2f"
+        % mean_squared_error(Y_real_test, y_predpr))
+print("LR Test Mean squared error: %.2f"
+        % mean_squared_error(Y_real_test, y_pred))
+print("Base Train Mean squared error: %.2f"
+        % mean_squared_error(Y_real_train, y_predpr_train))
+print("LR Train Mean squared error: %.2f"
+        % mean_squared_error(Y_real_train, y_pred_train))
+print('Base Test Variance score: %.2f' % r2_score(Y_real_test, y_predpr))
+print('LR Test Variance score: %.2f' % r2_score(Y_real_test, y_pred))
+print('Base Train Variance score: %.2f' % r2_score(Y_real_train, y_predpr_train))
+print('LR Train Variance score: %.2f' % r2_score(Y_real_train, y_pred_train))
+
+print('Coefficients: \n', regr.coef_)
+print('PR Coefficients: \n', 1/X_real_test['Unadjusted Production Rate'].mean())
+
+#Plot outputs
+f, ax = plt.subplots(nrows=2,ncols=2)
+
+ax[0,0].scatter(X_real_test['SQFT'], Y_real_test, color='black')
+ax[0,0].plot(X_real_test['SQFT'], y_predpr, color='blue', linewidth=3)
+ax[1,0].scatter(X_real_train['SQFT'], Y_real_train, color='black')
+ax[1,0].plot(X_real_train['SQFT'], y_predpr_train, color='blue', linewidth=3)
+ax[0,1].scatter(X_val, Y_val,  color='black')
+ax[0,1].plot(X_val, y_pred, color='blue', linewidth=3)
+ax[1,1].scatter(X_train, Y_train, color= 'black')
+ax[1,1].plot(X_train, y_pred_train, color='blue', linewidth=3)
+
+plt.show()
+
+predpr_error = np.max(Y_train - y_predpr_train,0)/Y_train
+predpr_error = np.sort(predpr_error)
+pred_error = np.max(Y_train - y_pred_train,0)/Y_train
+pred_error = np.sort(pred_error)
+#print(predpr_error)
+#print(pred_error)
+#plt.plot(np.linspace(0,100,len(predpr_error)),predpr_error, color='red')
+#plt.plot(np.linspace(0,100,len(pred_error)),pred_error, color='blue')
+#plt.show()
+
+surprise_hrs_train = 0
+surprisepr_hrs_train = 0
+over_hrs_train = 0
+overpr_hrs_train = 0
+for i in predpr_error:
+    if i > 0:
+        surprisepr_hrs_train = surprisepr_hrs_train + i
+    if i < 0:
+        overpr_hrs_train = overpr_hrs_train + i
+        
+for t in pred_error:
+    if t > 0:
+        surprise_hrs_train = surprise_hrs_train + t
+    if t < 0:
+        over_hrs_train = over_hrs_train + t
+print('LR train underpredicted hours: %.2f' % surprise_hrs_train)
+print('Unadjusted train underpredicted hours: %.2f' % surprisepr_hrs_train)
+
+print('LR train overpredicted hours: %.2f' % over_hrs_train)
+print('Unadjusted train overpredicted hours: %.2f' % overpr_hrs_train)
+#predpr_error = abs(Y_val - y_predpr)/ Y_val
+#pred_error = abs(Y_val - y_pred)/Y_val
+
+predpr_error = list(map(lambda x : max(x,0), Y_val - y_predpr))/Y_val
+pred_error = list(map(lambda x : max(x,0), Y_val - y_pred))/Y_val
+predpr_error = np.sort(predpr_error)
+pred_error = np.sort(pred_error)
+f = plt.figure()
+plt.plot(np.linspace(0,100,len(predpr_error)),predpr_error, color='red')
+plt.plot(np.linspace(0,100,len(pred_error)),pred_error, color='blue')
+f.suptitle('Mech Prep - Error Comparison',fontsize=20, y = 1.0)
+plt.xlabel('Percentile')
+plt.ylabel('Relative Overtime Error')
+plt.show()
+#print(predpr_error)
+#print(pred_error)
+surprise_hrs_test = 0
+surprisepr_hrs_test = 0
+over_hrs_test = 0
+overpr_hrs_test = 0
+for i in predpr_error:
+    if i > 0:
+        surprisepr_hrs_test = surprisepr_hrs_test + i
+    if i < 0:
+        overpr_hrs_test = overpr_hrs_test + i
+        
+for t in pred_error:
+    if t > 0:
+        surprise_hrs_test = surprise_hrs_test + t
+    if t < 0:
+        over_hrs_test = over_hrs_test + t
+    
+    #return (surprise_hrs_test, surprise_hrs_train, surprisepr_hrs_test, surprisepr_hrs_train, over_hrs_test, over_hrs_train, overpr_hrs_test, overpr_hrs_train)
+print('LR test underpredicted hours: %.2f' % surprise_hrs_test)
+print('Unadjusted test underpredicted hours: %.2f' % surprisepr_hrs_test)
+
+print('LR test overpredicted hours:', over_hrs_test)
+print('Unadjusted test overpredicted hours: %.2f' % overpr_hrs_test)
+
+RMSE_Lin = np.square(y_pred - Y_val)
+RMSE_Lin = np.sqrt(RMSE_Lin.mean())
+RMSE_base = np.square(y_predpr - Y_val)
+RMSE_base = np.sqrt(RMSE_base.mean())
+
+# R Code
+
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(car)
+# Simple Linear Regression for Mech Prep
+mechpreptrain <- read.csv("mechpreptrain.csv") 
+mechpreptest = read.csv("mechpreptest.csv")
+set.seed(144)
+mod1 <- lm(Time.for.Work ~  SQFT, 
+           data = mechpreptrain)
+summary(mod1)
+
+mechpreppred <- predict(mod1, newdata=mechpreptest)
+# this builds a vector of predicted values on the test set
+SSE = sum((mechpreptest$Time.for.Work - mechpreppred)^2)
+SST = sum((mechpreptest$Time.for.Work - mean(mechpreptrain$Time.for.Work))^2)
+OSR2 = 1 - SSE/SST
+
+RMSE_Lin = sqrt(mean((mechpreppred - mechpreptest$Time.for.Work)^2))
+
+# Complex Linear Regression for Mech Prep
+# Locations laid out
+mechprepstrain <- read.csv("mechprepstrain.csv") 
+mechprepstest = read.csv("mechprepstest.csv")
+set.seed(144)
+mod <- lm(Time.for.Work ~  SQFT + Num.of.Painters + Super.Structure + UWH + Freeboard + Spots + Decks + Sand, 
+           data = mechprepstrain)
+summary(mod)
+
+mechpreppreds <- predict(mod, newdata=mechprepstest)
+# this builds a vector of predicted values on the test set
+SSE = sum((mechprepstest$Time.for.Work - mechpreppreds)^2)
+SST = sum((mechprepstest$Time.for.Work - mean(mechprepstrain$Time.for.Work))^2)
+OSR2 = 1 - SSE/SST
+
+vif(mod)
+
+# Complex Linear Regression for Mech Prep
+# Areas
+mechareastrain <- read.csv("mechareastrain.csv") 
+mechareastest = read.csv("mechareastest.csv")
+set.seed(144)
+mod <- lm(Time.for.Work ~  SQFT + Num.of.Painters, 
+          data = mechareastrain)
+summary(mod)
+
+mechareaspreds <- predict(mod, newdata=mechareastest)
+# this builds a vector of predicted values on the test set
+SSE = sum((mechareastest$Time.for.Work - mechareaspreds)^2)
+SST = sum((mechareastest$Time.for.Work - mean(mechareastrain$Time.for.Work))^2)
+OSR2 = 1 - SSE/SST
+
+RMSE_Lin = sqrt(mean((mechareaspreds - mechareastest$Time.for.Work)^2))
