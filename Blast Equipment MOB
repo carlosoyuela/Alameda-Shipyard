@@ -1,0 +1,260 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn import datasets, linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+
+blastequip = pd.DataFrame(pd.read_excel('Blast Equipment Mob and DeMob .xlsx'))
+#blastequip.columns
+blastequipclean = blastequip.drop(['Unnamed: 15','Unnamed: 16','Adjusted Production Rate','Task 2','Date'],axis = 1)
+blastequipsimple = blastequipclean.drop(['Vessel ','Area ','Location','TASK','num of Painters','Shifts','Length of Shift','Unadjusted Production Rate','Number of Hoses','Hours Per hose','Lessons learned ','Calculated Hours','Synchro','HMB1','Pier 3','DD-1','Potable Water Tank','Mast','House','Voids','Super structure','UWH','Decks','Freeboard','Areas','MOB','DeMOB'],axis=1)
+blastequipsimple = blastequipsimple.dropna()
+blastequippr = blastequipclean.drop(['Vessel ','Area ','Location','TASK','Shifts','Length of Shift','Hours Per hose','Lessons learned '],axis = 1)
+blastequippr = blastequippr.dropna()
+
+
+D = blastequipsimple['SQFT']
+T = blastequipsimple['Time for Work']
+Y_train, Y_test, X_train, X_test = train_test_split(T,D, test_size=0.3)
+blastequip_train = pd.DataFrame([X_train,Y_train])
+blastequip_train = blastequip_train.T
+blastequip_test = pd.DataFrame([X_test,Y_test])
+blastequip_test = blastequip_test.T
+blastequip_train.to_csv("blastequiptrain.csv", encoding = 'utf-8',index=False)
+blastequip_test.to_csv("blastequiptest.csv", encoding = 'utf-8',index=False)
+
+D = blastequippr.drop(['Time for Work','Calculated Hours','Areas'], axis = 1)
+T = blastequippr['Time for Work']
+Y_train, Y_test, X_train, X_test = train_test_split(T,D, test_size=0.3)
+blastequips_train = pd.DataFrame([X_train['SQFT'], X_train['num of Painters'], X_train['Super structure'], X_train['UWH'], X_train['Freeboard'], X_train['Number of Hoses'], X_train['Decks'], X_train['Synchro'], X_train['HMB1'], X_train['Pier 3'], X_train['DD-1'], X_train['Potable Water Tank'], X_train['Mast'], X_train['House'], X_train['Voids'], X_train['MOB'], X_train['DeMOB'], Y_train])
+blastequips_train = blastequips_train.T
+blastequips_test = pd.DataFrame([X_test['SQFT'], X_test['num of Painters'], X_test['Super structure'], X_test['UWH'], X_test['Freeboard'], X_test['Number of Hoses'], X_test['Decks'], X_test['Synchro'], X_test['HMB1'], X_test['Pier 3'], X_test['DD-1'], X_test['Potable Water Tank'], X_test['Mast'], X_test['House'], X_test['Voids'], X_test['MOB'], X_test['DeMOB'], Y_test])
+blastequips_test = blastequips_test.T
+blastequips_train.to_csv("blastequipstrain.csv", encoding = 'utf-8',index=False)
+blastequips_test.to_csv("blastequipstest.csv", encoding = 'utf-8',index=False)
+
+D = blastequippr.drop(['Time for Work','Calculated Hours'], axis = 1)
+T = blastequippr['Time for Work']
+Y_train, Y_test, X_train, X_test = train_test_split(T,D, test_size=0.3)
+blastareas_train = pd.DataFrame([X_train['SQFT'], X_train['num of Painters'], X_train['Areas'], X_train['Number of Hoses'], X_train['Synchro'], X_train['HMB1'], X_train['MOB'], Y_train])
+blastareas_train = blastareas_train.T
+blastareas_test = pd.DataFrame([X_test['SQFT'], X_test['num of Painters'], X_test['Areas'], X_test['Number of Hoses'], X_test['Synchro'], X_test['HMB1'], X_test['MOB'], Y_test])
+blastareas_test = blastareas_test.T
+blastareas_train.to_csv("blastareastrain.csv", encoding = 'utf-8',index=False)
+blastareas_test.to_csv("blastareastest.csv", encoding = 'utf-8',index=False)
+#plt.scatter(X_train, Y_train,  color='black')
+#plt.xticks(())
+#plt.yticks(())
+#plt.show()
+
+np.random.seed(1337) # set random seed for reproducibility
+
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn import datasets, linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+
+D = blastequippr.drop(['Calculated Hours'],axis = 1)
+T = blastequippr['Time for Work']
+
+#def linregperformance():
+Y_real_train, Y_real_test, X_real_train, X_real_test = train_test_split(T,D, test_size=0.2)
+
+X_train = X_real_train['SQFT']
+X_val = X_real_test['SQFT']
+Y_train = Y_real_train
+Y_val = Y_real_test
+
+regr = linear_model.LinearRegression()
+X_train = X_train.reshape(-1,1)
+regr.fit(X_train, Y_train)
+X_val = X_val.reshape(-1,1)
+y_pred = regr.predict(X_val)
+y_pred_train = regr.predict(X_train)
+
+y_predpr = X_real_test['SQFT']*(1/X_real_train['Unadjusted Production Rate'].mean())
+y_predpr_train = X_real_train['SQFT']*(1/X_real_train['Unadjusted Production Rate'].mean())
+    
+#regrs = linear_model.LinearRegression()
+#X_trains = X_train['SQFT'].reshape(-1,1)
+#regrs.fit(X_train, Y_train)
+#X_vals = X_val['SQFT'].reshape(-1,1)
+#y_pred = regrs.predict(X_val)
+#y_pred_train = regrs.predict(X_train)
+    
+    #random_forest = RandomForestClassifier(n_estimators=1000)
+    #random_forest.fit(X_train, Y_train)
+    #acc_random_forest = random_forest.score(X_val, Y_val)
+    #acc_random_forest
+
+print("Base Test Mean squared error: %.2f"
+        % mean_squared_error(Y_real_test, y_predpr))
+print("LR Test Mean squared error: %.2f"
+        % mean_squared_error(Y_real_test, y_pred))
+print("Base Train Mean squared error: %.2f"
+        % mean_squared_error(Y_real_train, y_predpr_train))
+print("LR Train Mean squared error: %.2f"
+        % mean_squared_error(Y_real_train, y_pred_train))
+print('Base Test Variance score: %.2f' % r2_score(Y_real_test, y_predpr))
+print('LR Test Variance score: %.2f' % r2_score(Y_real_test, y_pred))
+print('Base Train Variance score: %.2f' % r2_score(Y_real_train, y_predpr_train))
+print('LR Train Variance score: %.2f' % r2_score(Y_real_train, y_pred_train))
+
+print('Coefficients: \n', regr.coef_)
+print('PR Coefficients: \n', 1/X_real_test['Unadjusted Production Rate'].mean())
+
+#Plot outputs
+f, ax = plt.subplots(nrows=2,ncols=2)
+
+ax[0,0].scatter(X_real_test['SQFT'], Y_real_test, color='black')
+ax[0,0].plot(X_real_test['SQFT'], y_predpr, color='blue', linewidth=3)
+ax[1,0].scatter(X_real_train['SQFT'], Y_real_train, color='black')
+ax[1,0].plot(X_real_train['SQFT'], y_predpr_train, color='blue', linewidth=3)
+ax[0,1].scatter(X_val, Y_val,  color='black')
+ax[0,1].plot(X_val, y_pred, color='blue', linewidth=3)
+ax[1,1].scatter(X_train, Y_train, color= 'black')
+ax[1,1].plot(X_train, y_pred_train, color='blue', linewidth=3)
+
+plt.show()
+
+predpr_error = np.max(Y_train - y_predpr_train,0)/Y_train
+predpr_error = np.sort(predpr_error)
+pred_error = np.max(Y_train - y_pred_train,0)/Y_train
+pred_error = np.sort(pred_error)
+#print(predpr_error)
+#print(pred_error)
+#plt.plot(np.linspace(0,100,len(predpr_error)),predpr_error, color='red')
+#plt.plot(np.linspace(0,100,len(pred_error)),pred_error, color='blue')
+#plt.show()
+
+surprise_hrs_train = 0
+surprisepr_hrs_train = 0
+over_hrs_train = 0
+overpr_hrs_train = 0
+for i in predpr_error:
+    if i < 0:
+        surprisepr_hrs_train = surprisepr_hrs_train + i
+    if i > 0:
+        overpr_hrs_train = overpr_hrs_train + i
+        
+for t in pred_error:
+    if t < 0:
+        surprise_hrs_train = surprise_hrs_train + t
+    if t > 0:
+        over_hrs_train = over_hrs_train + t
+print('LR train underpredicted hours: %.2f' % surprise_hrs_train)
+print('Unadjusted train underpredicted hours: %.2f' % surprisepr_hrs_train)
+
+print('LR train overpredicted hours: %.2f' % over_hrs_train)
+print('Unadjusted train overpredicted hours: %.2f' % overpr_hrs_train)
+
+predpr_error = np.max(Y_val - y_predpr,0)/ Y_val
+pred_error = np.max(Y_val - y_pred, 0)/Y_val
+#predpr_error = abs(Y_val - y_predpr)/ Y_val
+#pred_error = abs(Y_val - y_pred)/Y_val
+predpr_error = np.sort(predpr_error)
+pred_error = np.sort(pred_error)
+plt.plot(np.linspace(0,100,len(predpr_error)),predpr_error, color='red')
+plt.plot(np.linspace(0,100,len(pred_error)),pred_error, color='blue')
+plt.show()
+#print(predpr_error)
+#print(pred_error)
+surprise_hrs_test = 0
+surprisepr_hrs_test = 0
+over_hrs_test = 0
+overpr_hrs_test = 0
+for i in predpr_error:
+    if i < 0:
+        surprisepr_hrs_test = surprisepr_hrs_test + i
+    if i > 0:
+        overpr_hrs_test = overpr_hrs_test + i
+        
+for t in pred_error:
+    if t < 0:
+        surprise_hrs_test = surprise_hrs_test + t
+    if t > 0:
+        over_hrs_test = over_hrs_test + t
+    
+    #return (surprise_hrs_test, surprise_hrs_train, surprisepr_hrs_test, surprisepr_hrs_train, over_hrs_test, over_hrs_train, overpr_hrs_test, overpr_hrs_train)
+print('LR test underpredicted hours: %.2f' % surprise_hrs_test)
+print('Unadjusted test underpredicted hours: %.2f' % surprisepr_hrs_test)
+
+print('LR test overpredicted hours:', over_hrs_test)
+print('Unadjusted test overpredicted hours: %.2f' % overpr_hrs_test)
+
+predpr_error = np.max(Y_train - y_predpr_train,0)/Y_train
+predpr_error = np.sort(predpr_error)
+pred_error = np.max(Y_train - y_pred_train,0)/Y_train
+pred_error = np.sort(pred_error)
+#print(predpr_error)
+#print(pred_error)
+#plt.plot(np.linspace(0,100,len(predpr_error)),predpr_error, color='red')
+#plt.plot(np.linspace(0,100,len(pred_error)),pred_error, color='blue')
+#plt.show()
+
+surprise_hrs_train = 0
+surprisepr_hrs_train = 0
+over_hrs_train = 0
+overpr_hrs_train = 0
+for i in predpr_error:
+    if i > 0:
+        surprisepr_hrs_train = surprisepr_hrs_train + i
+    if i < 0:
+        overpr_hrs_train = overpr_hrs_train + i
+        
+for t in pred_error:
+    if t > 0:
+        surprise_hrs_train = surprise_hrs_train + t
+    if t < 0:
+        over_hrs_train = over_hrs_train + t
+print('LR train underpredicted hours: %.2f' % surprise_hrs_train)
+print('Unadjusted train underpredicted hours: %.2f' % surprisepr_hrs_train)
+
+print('LR train overpredicted hours: %.2f' % over_hrs_train)
+print('Unadjusted train overpredicted hours: %.2f' % overpr_hrs_train)
+#predpr_error = abs(Y_val - y_predpr)/ Y_val
+#pred_error = abs(Y_val - y_pred)/Y_val
+
+predpr_error = list(map(lambda x : max(x,0), Y_val - y_predpr))/Y_val
+pred_error = list(map(lambda x : max(x,0), Y_val - y_pred))/Y_val
+predpr_error = np.sort(predpr_error)
+pred_error = np.sort(pred_error)
+f = plt.figure()
+plt.plot(np.linspace(0,100,len(predpr_error)),predpr_error, color='red')
+plt.plot(np.linspace(0,100,len(pred_error)),pred_error, color='blue')
+f.suptitle('Blast Equipment Mob and DeMob - Error Comparison',fontsize=20, y = 1.0)
+plt.xlabel('Percentile')
+plt.ylabel('Relative Overtime Error')
+plt.show()
+#print(predpr_error)
+#print(pred_error)
+surprise_hrs_test = 0
+surprisepr_hrs_test = 0
+over_hrs_test = 0
+overpr_hrs_test = 0
+for i in predpr_error:
+    if i > 0:
+        surprisepr_hrs_test = surprisepr_hrs_test + i
+    if i < 0:
+        overpr_hrs_test = overpr_hrs_test + i
+        
+for t in pred_error:
+    if t > 0:
+        surprise_hrs_test = surprise_hrs_test + t
+    if t < 0:
+        over_hrs_test = over_hrs_test + t
+    
+    #return (surprise_hrs_test, surprise_hrs_train, surprisepr_hrs_test, surprisepr_hrs_train, over_hrs_test, over_hrs_train, overpr_hrs_test, overpr_hrs_train)
+print('LR test underpredicted hours: %.2f' % surprise_hrs_test)
+print('Unadjusted test underpredicted hours: %.2f' % surprisepr_hrs_test)
+
+print('LR test overpredicted hours:', over_hrs_test)
+print('Unadjusted test overpredicted hours: %.2f' % overpr_hrs_test)
+
+RMSE_Lin = np.square(y_pred - Y_val)
+RMSE_Lin = np.sqrt(RMSE_Lin.mean())
+RMSE_base = np.square(y_predpr - Y_val)
+RMSE_base = np.sqrt(RMSE_base.mean())
